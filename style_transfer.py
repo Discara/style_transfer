@@ -234,6 +234,7 @@ def run_style_transfer(content_img,
                        style_weight=1e-2):
     # We don't need to (or want to) train any layers of our model, so we set their
     # trainable to false.
+    st.text("hey")
     model = get_model()
     for layer in model.layers:
         layer.trainable = False
@@ -264,24 +265,19 @@ def run_style_transfer(content_img,
         'content_features': content_features
     }
 
-    # For displaying
-    num_rows = 2
-    num_cols = 5
-    display_interval = num_iterations / (num_rows * num_cols)
-    start_time = time.time()
-    global_start = time.time()
-
     norm_means = np.array([103.939, 116.779, 123.68])
     min_vals = -norm_means
     max_vals = 255 - norm_means
 
-    latest_iteration = st.empty()
     estimated = st.empty()
-
+    latest_iteration = st.empty()
     bar = st.progress(0.0)
+    col1, col2, col3 = st.beta_columns((1, 2.5, 1))
+    with col2:
+        cur_image = st.empty()
+
     start_time = time.time()
 
-    # imgs = []
     for i in range(num_iterations):
         grads, all_loss = compute_grads(cfg)
         loss, style_score, content_score = all_loss
@@ -296,11 +292,15 @@ def run_style_transfer(content_img,
             best_img = deprocess_img(init_image.numpy())
 
         latest_iteration.text(f'Итерация {i + 1}/{num_iterations}')
+        estimated.text('Ожидаемое время выполнения: ∞ с')
         if i > 0:
             cur_speed = i / (time.time() - start_time)
             estimated_time = (num_iterations - i - 1) / cur_speed
             estimated.text('Ожидаемое время выполнения: {:.2f} с'.format(estimated_time))
-        bar.progress((i + 1) / num_iterations)
+            bar.progress((i + 1) / num_iterations)
+            cur_image.image(Image.fromarray(best_img), use_column_width=True)
+        if i + 1 == num_iterations:
+            cur_image.empty()
 
     #   if i % display_interval == 0:
     #        start_time = time.time()

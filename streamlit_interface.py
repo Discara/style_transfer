@@ -57,7 +57,7 @@ def main():
         if style_transfer_button:
             if content_image is not None and style_image is not None:
                 best, best_loss = style.run_style_transfer(content_image, style_image, number_of_iterations)
-                col7, col8, col9 = st.beta_columns(3)
+                col7, col8, col9 = st.beta_columns((1, 4, 1))
                 with col8:
                     if best.any():
                         col8.image(Image.fromarray(best), use_column_width=True)
