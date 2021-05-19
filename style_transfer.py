@@ -276,7 +276,10 @@ def run_style_transfer(content_img,
     max_vals = 255 - norm_means
 
     latest_iteration = st.empty()
+    estimated = st.empty()
+
     bar = st.progress(0.0)
+    start_time = time.time()
 
     # imgs = []
     for i in range(num_iterations):
@@ -292,10 +295,12 @@ def run_style_transfer(content_img,
             best_loss = loss
             best_img = deprocess_img(init_image.numpy())
 
-        if i <= num_iterations:
-            latest_iteration.text(f'Итерация {i+1}/{num_iterations}')
-            bar.progress((i + 1) / num_iterations)
-            time.sleep(0.1)
+        latest_iteration.text(f'Итерация {i + 1}/{num_iterations}')
+        if i > 0:
+            cur_speed = i / (time.time() - start_time)
+            estimated_time = (num_iterations - i - 1) / cur_speed
+            estimated.text('Ожидаемое время выполнения: {:.2f} с'.format(estimated_time))
+        bar.progress((i + 1) / num_iterations)
 
     #   if i % display_interval == 0:
     #        start_time = time.time()
@@ -321,7 +326,6 @@ def run_style_transfer(content_img,
     #     plt.yticks([])
 
     return best_img, best_loss
-
 
 # def show_results(best_img, content_path, style_path, show_large_final=True):
 #     plt.figure(figsize=(10, 5))
