@@ -1,4 +1,6 @@
 import tensorflow as tf
+import streamlit as st
+import time
 from tensorflow.python.keras.preprocessing import image as kp_image
 from tensorflow.python.keras import models
 from tensorflow.python.keras import losses
@@ -233,7 +235,6 @@ def run_style_transfer(content_img,
     # We don't need to (or want to) train any layers of our model, so we set their
     # trainable to false.
     model = get_model()
-    # models.save_model(model, )
     for layer in model.layers:
         layer.trainable = False
 
@@ -274,7 +275,10 @@ def run_style_transfer(content_img,
     min_vals = -norm_means
     max_vals = 255 - norm_means
 
-    imgs = []
+    latest_iteration = st.empty()
+    bar = st.progress(0.0)
+
+    # imgs = []
     for i in range(num_iterations):
         grads, all_loss = compute_grads(cfg)
         loss, style_score, content_score = all_loss
@@ -288,15 +292,20 @@ def run_style_transfer(content_img,
             best_loss = loss
             best_img = deprocess_img(init_image.numpy())
 
-        if i % display_interval == 0:
-            start_time = time.time()
+        if i <= num_iterations:
+            latest_iteration.text(f'Итерация {i+1}/{num_iterations}')
+            bar.progress((i + 1) / num_iterations)
+            time.sleep(0.1)
 
-            # Use the .numpy() method to get the concrete numpy array
-            plot_img = init_image.numpy()
-            plot_img = deprocess_img(plot_img)
-            imgs.append(plot_img)
-            IPython.display.clear_output(wait=True)
-            IPython.display.display_png(Image.fromarray(plot_img))
+    #   if i % display_interval == 0:
+    #        start_time = time.time()
+    #
+    #         # Use the .numpy() method to get the concrete numpy array
+    #         plot_img = init_image.numpy()
+    #         plot_img = deprocess_img(plot_img)
+    #         imgs.append(plot_img)
+    #         IPython.display.clear_output(wait=True)
+    #         IPython.display.display_png(Image.fromarray(plot_img))
     #         print('Iteration: {}'.format(i))
     #         print('Total loss: {:.4e}, '
     #               'style loss: {:.4e}, '

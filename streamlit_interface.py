@@ -1,48 +1,58 @@
 import streamlit as st
-import numpy as np
-import pandas as pd
 from PIL import Image
-
-import tensorflow as tf
-from tensorflow.python.keras.preprocessing import image as kp_image
 import style_transfer as style
+
+# def get_image_download_link(img):
+#     """Generates a link allowing the PIL image to be downloaded
+# 	in:  PIL image
+# 	out: href string
+# 	"""
+#     buffered = BytesIO()
+#     img.save(buffered, format="JPEG")
+#     img_str = base64.b64encode(buffered.getvalue()).decode()
+#     href = f'<a href="data:file/jpg;base64,{img_str}">Download result</a>'
+#     return href
+#
+#
+# st.markdown(get_image_download_link(result), unsafe_allow_html=True)
 
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config(layout="centered")
     st.title('Нейронный перенос стиля')
     # st.text(tf.executing_eagerly())
-    menu = ["Домой", "Обо мне"]
+    menu = ["Домашняя страница", "Обо мне"]
     choice = st.sidebar.selectbox("Меню", menu)
 
-    if choice == "Домой":
+    if choice == "Домашняя страница":
         st.subheader("Выберите два изображения:")
         col1, col2 = st.beta_columns(2)
 
         with col1:
-            content_image = st.file_uploader("Выберите изображение содержания", ['png', 'jpg', 'jpeg'],
-                                             help="Перетащите или выберите файл. \n\n"
-                                                  "Ограничение размера - 200 МБ на файл\n\n"
-                                                  "• Форматы файлов - PNG, JPG, JPEG.")
+            content_image = st.file_uploader("Выберите изображение для обработки", ['png', 'jpg', 'jpeg'],
+                                             help="Перетащите или выберите файл, "
+                                                  "ограничение размера - 25 Мб на файл\n\n"
+                                                  " • Форматы файлов - PNG, JPG, JPEG.")
             if content_image is not None:
                 col1.image(content_image, use_column_width=True)
 
         with col2:
-            style_image = st.file_uploader("Выберите изображение стиля", ['png', 'jpg', 'jpeg'],
-                                           help="Перетащите или выберите файл, ограничение размера - 200 МБ на "
-                                                "файл • Форматы файлов - PNG, JPG, JPEG.")
+            style_image = st.file_uploader("Выберите изображение с исходным стилем", ['png', 'jpg', 'jpeg'],
+                                           help="Перетащите или выберите файл, "
+                                                "ограничение размера - 200 МБ на файл\n\n"
+                                                " • Форматы файлов - PNG, JPG, JPEG.")
             if style_image is not None:
                 col2.image(style_image, use_column_width=True)
 
-        col4, col5, col6 = st.beta_columns(3)
+        col4, col5, col6 = st.beta_columns((1,3,1))
         with col5:
-            number_of_iterations = st.slider("Выберите число итераций цикла стилизации", 10, 200, 20, 1,
+            number_of_iterations = st.slider("Выберите число итераций цикла стилизации", 10, 500, 20, 1,
                                              format=None, key=None,
                                              help="Число итераций определяет итоговое качество стилизации изображения")
 
-        col4, col5, col6 = st.beta_columns((4, 1, 4))
+        col4, col5, col6 = st.beta_columns((2, 1, 2))
         with col5:
-            style_transfer_button = st.button("Run style transfer")
+            style_transfer_button = st.button("Начать перенос стиля")
 
         if style_transfer_button:
             if content_image is not None and style_image is not None:
@@ -51,10 +61,16 @@ def main():
                 with col8:
                     if best.any():
                         col8.image(Image.fromarray(best), use_column_width=True)
+            elif content_image is not None:
+                st.error("Ошибка: Изображение с исходным стилем не загружено.")
+            elif style_image is not None:
+                st.error("Ошибка: Изображение для обработки не загружено.")
             else:
-                st.error("Ошибка: Хотя бы одно изображение не загружено.")
+                st.error("Ошибка: Изображение для обработки и изображение с исходным стилем не загружены.")
     else:
         st.subheader("Обо мне")
+        st.text("Журавлева Полина, ИУ5-81Б")
+        st.text("2021")
 
 
 if __name__ == '__main__':
