@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import style_transfer as style
 
+
 # def get_image_download_link(img):
 #     """Generates a link allowing the PIL image to be downloaded
 # 	in:  PIL image
@@ -39,28 +40,32 @@ def main():
         with col2:
             style_image = st.file_uploader("Выберите изображение с исходным стилем", ['png', 'jpg', 'jpeg'],
                                            help="Перетащите или выберите файл, "
-                                                "ограничение размера - 200 МБ на файл\n\n"
+                                                "ограничение размера - 25 МБ на файл\n\n"
                                                 " • Форматы файлов - PNG, JPG, JPEG.")
             if style_image is not None:
                 col2.image(style_image, use_column_width=True)
 
-        col4, col5, col6 = st.beta_columns((1,3,1))
+        col4, col5, col6 = st.beta_columns((1, 3, 1))
         with col5:
             number_of_iterations = st.slider("Выберите число итераций цикла стилизации", 10, 500, 20, 1,
                                              format=None, key=None,
                                              help="Число итераций определяет итоговое качество стилизации изображения")
 
-        col4, col5, col6 = st.beta_columns((2, 1, 2))
-        with col5:
+        col7, col8, col9 = st.beta_columns((2, 1, 2))
+        with col8:
             style_transfer_button = st.button("Начать перенос стиля")
+        # with col9:
+        #     end_button = st.button("Stop")
 
         if style_transfer_button:
             if content_image is not None and style_image is not None:
                 best, best_loss = style.run_style_transfer(content_image, style_image, number_of_iterations)
-                col7, col8, col9 = st.beta_columns((1, 4, 1))
-                with col8:
+                # if end_button:
+                #     pass
+                col10, col11, col12 = st.beta_columns((1, 4, 1))
+                with col11:
                     if best.any():
-                        col8.image(Image.fromarray(best), use_column_width=True)
+                        col11.image(Image.fromarray(best), use_column_width=True)
             elif content_image is not None:
                 st.error("Ошибка: Изображение с исходным стилем не загружено.")
             elif style_image is not None:
