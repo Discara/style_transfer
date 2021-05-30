@@ -1,24 +1,11 @@
 import tensorflow as tf
 import streamlit as st
-import time
 from tensorflow.python.keras.preprocessing import image as kp_image
 from tensorflow.python.keras import models
-from tensorflow.python.keras import losses
-from tensorflow.python.keras import layers
-from tensorflow.python.keras import backend as K
 
 from PIL import Image
 import numpy as np
-import pandas as pd
 import time
-import functools
-import IPython.display
-
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
-mpl.rcParams['figure.figsize'] = (10, 10)
-mpl.rcParams['axes.grid'] = False
 
 
 # VISUALIZE THE INPUT
@@ -34,17 +21,6 @@ def load_image(image_file):
     img = np.expand_dims(img, axis=0)
 
     return img
-
-
-# def image_show(img, title=None):
-#     # Remove the batch dimension
-#     out = np.squeeze(img, axis=0)
-#     # Normalize for display
-#     out = out.astype('uint8')
-#     plt.imshow(out)
-#     if title is not None:
-#         plt.title(title)
-#     plt.imshow(out)
 
 
 # PREPARE THE DATA
@@ -127,13 +103,8 @@ def gram_matrix(input_tensor):
 
 
 def get_style_loss(base_style, gram_target):
-    """Expects two images of dimension h, w, c"""
-    # height, width, num filters of each layer
-    # We scale the loss at a given layer by the size of the feature map and the number of filters
-    height, width, channels = base_style.get_shape().as_list()
     gram_style = gram_matrix(base_style)
-
-    return tf.reduce_mean(tf.square(gram_style - gram_target))  # / (4. * (channels ** 2) * (width * height) ** 2)
+    return tf.reduce_mean(tf.square(gram_style - gram_target))
 
 
 # Apply style transfer to our images
@@ -248,9 +219,6 @@ def run_style_transfer(content_img,
     # Create our optimizer
     opt = tf.optimizers.Adam(learning_rate=5, beta_1=0.99, epsilon=1e-1)
 
-    # For displaying intermediate images
-    iter_count = 1
-
     # Store our best result
     best_loss, best_img = float('inf'), None
 
@@ -283,7 +251,6 @@ def run_style_transfer(content_img,
         opt.apply_gradients([(grads, init_image)])
         clipped = tf.clip_by_value(init_image, min_vals, max_vals)
         init_image.assign(clipped)
-        end_time = time.time()
 
         if loss < best_loss:
             # Update best loss and best image from total loss.
@@ -301,45 +268,4 @@ def run_style_transfer(content_img,
         if i + 1 == num_iterations:
             cur_image.empty()
 
-    #   if i % display_interval == 0:
-    #        start_time = time.time()
-    #
-    #         # Use the .numpy() method to get the concrete numpy array
-    #         plot_img = init_image.numpy()
-    #         plot_img = deprocess_img(plot_img)
-    #         imgs.append(plot_img)
-    #         IPython.display.clear_output(wait=True)
-    #         IPython.display.display_png(Image.fromarray(plot_img))
-    #         print('Iteration: {}'.format(i))
-    #         print('Total loss: {:.4e}, '
-    #               'style loss: {:.4e}, '
-    #               'content loss: {:.4e}, '
-    #               'time: {:.4f}s'.format(loss, style_score, content_score, time.time() - start_time))
-    # print('Total time: {:.4f}s'.format(time.time() - global_start))
-    # IPython.display.clear_output(wait=True)
-    # plt.figure(figsize=(14, 4))
-    # for i, img in enumerate(imgs):
-    #     plt.subplot(num_rows, num_cols, i + 1)
-    #     plt.imshow(img)
-    #     plt.xticks([])
-    #     plt.yticks([])
-
     return best_img, best_loss
-
-# def show_results(best_img, content_path, style_path, show_large_final=True):
-#     plt.figure(figsize=(10, 5))
-#     content = load_image(content_path)
-#     style = load_image(style_path)
-#
-#     plt.subplot(1, 2, 1)
-#     image_show(content, 'Content Image')
-#
-#     plt.subplot(1, 2, 2)
-#     image_show(style, 'Style Image')
-#
-#     if show_large_final:
-#         plt.figure(figsize=(10, 10))
-#
-#         plt.imshow(best_img)
-#         plt.title('Output Image')
-#         plt.show()
